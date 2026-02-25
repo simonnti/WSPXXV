@@ -2,7 +2,6 @@ require 'sqlite3'
 
 db = SQLite3::Database.new("databas.db")
 
-
 def seed!(db)
   puts "Using db file: db/todos.db"
   puts "🧹 Dropping old tables..."
@@ -15,27 +14,27 @@ def seed!(db)
 end
 
 def drop_tables(db)
-  db.execute('DROP TABLE IF EXISTS exempel')
+  db.execute('DROP TABLE IF EXISTS posts')
 end
 
 def create_tables(db)
-  db.execute('CREATE TABLE exempel (
+  db.execute('CREATE TABLE posts (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL, 
               description TEXT,
-              state BOOLEAN)')
+              price INTEGER)')
 end
 
 def populate_tables(db)
-  db.execute('INSERT INTO exempel (name, description, state) VALUES ("Köp mjölk", "3 liter mellanmjölk, eko",false)')
-  db.execute('INSERT INTO exempel (name, description, state) VALUES ("Köp julgran", "En rödgran",false)')
-  db.execute('INSERT INTO exempel (name, description, state) VALUES ("Pynta gran", "Glöm inte lamporna i granen och tomten",false)')
+  db.execute('INSERT INTO posts (name, description) VALUES ("Goyslop", "säljer denna goyslop bilig")')
+  db.execute('INSERT INTO posts (name, description) VALUES ("mer goy zlob", "goyslop")')
+  db.execute('INSERT INTO posts (name, description) VALUES ("a a hahuh", "ahahahgags")')
 end
 
+def img_to_hex(db)
+  image_path = 'path/to/your/image.png'
+  binary_data = File.read(image_path)
+  hex_key = binary_data.unpack('H*').first
+end
 
 seed!(db)
-
-
-
-
-
