@@ -22,6 +22,7 @@ def create_tables(db)
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               title TEXT NOT NULL, 
               description TEXT,
+              price_period TEXT,
               price INTEGER,
               image_url TEXT)')
 end

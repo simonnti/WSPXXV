@@ -51,3 +51,11 @@ end
 post("/:id/return") do
     redirect('/')
 end
+
+get('/:id/post') do
+  db = SQLite3::Database.new("db/posts.db")
+  id = params[:id].to_i
+  db.results_as_hash = true
+  @posts = db.execute("SELECT * FROM posts WHERE id = ?", id).first
+  slim(:post)
+end
