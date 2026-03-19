@@ -1,9 +1,9 @@
 require 'sqlite3'
 
-db = SQLite3::Database.new("databas.db")
+db = SQLite3::Database.new("posts.db")
 
 def seed!(db)
-  puts "Using db file: db/todos.db"
+  puts "Using db file: posts.db"
   puts "🧹 Dropping old tables..."
   drop_tables(db)
   puts "🧱 Creating tables..."
@@ -20,21 +20,16 @@ end
 def create_tables(db)
   db.execute('CREATE TABLE posts (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              name TEXT NOT NULL, 
+              title TEXT NOT NULL, 
               description TEXT,
-              price INTEGER)')
+              price INTEGER,
+              image_url TEXT)')
 end
 
 def populate_tables(db)
-  db.execute('INSERT INTO posts (name, description) VALUES ("Goyslop", "säljer denna goyslop bilig")')
-  db.execute('INSERT INTO posts (name, description) VALUES ("mer goy zlob", "goyslop")')
-  db.execute('INSERT INTO posts (name, description) VALUES ("a a hahuh", "ahahahgags")')
-end
-
-def img_to_hex(db)
-  image_path = 'path/to/your/image.png'
-  binary_data = File.read(image_path)
-  hex_key = binary_data.unpack('H*').first
+  db.execute('INSERT INTO posts (title, description, image_url) VALUES ("Goyslop", "säljer denna goyslop bilig", "/img/blowie.jpg")')
+  db.execute('INSERT INTO posts (title, description, image_url) VALUES ("mer goy zlob", "goyslop", "/img/DAMN!!!!!!!!!!!!.jpg")')
+  db.execute('INSERT INTO posts (title, description, image_url) VALUES ("a a hahuh", "ahahahgags", "/img/green_fuck.jpg")')
 end
 
 seed!(db)

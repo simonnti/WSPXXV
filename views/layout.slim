@@ -2,19 +2,22 @@ html lang="en"
     head
         meta charset="UTF-8"/
         meta name="viewport" content="width=device-width, initial-scale=1.0"/
+        link rel="stylesheet" href="/styles.css?#{Time.now.to_i}"
         title Pryllånarn P2P
-        link rel="stylesheet" href="public/styles.css"
     body 
+        div class="header"
+            h1 Pryllånarn P2P
 
-        nav
-            h1 fruitside
+        div class="nav"
             a href="/" Hem
             a href="/private" Privat
             a href="/" Företag
             a href="/upload" Ladda Upp
             a href="/about" Om oss
-        section
-            ==yield
 
-        footer
-            p footy
+        section
+            div class="main.content"
+                ==yield
+                
+        div class="footer"
+            p © 2026 Pryllånarn P2P. All rights reserved.

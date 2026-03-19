@@ -1,0 +1,6 @@
+h3 #{@posts["title"]}
+p Description:
+p #{@posts["description"]}
+
+form action="/#{@posts["id"]}/return" method="post"
+    input type="submit" value="Tillbaka"

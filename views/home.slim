@@ -1,0 +1,13 @@
+h2 Alla annonser
+
+- @posts.each do |post|
+    img src="#{post['image_url']}" alt="Annonsbild" width="200"
+    h3
+        a href="/#{post['id']}/post" #{post['title']}
+    
+    h4 Pris per dag: #{post['price']} SEK
+
+    p Description: 
+    p #{post['description']}
+
+    hr
