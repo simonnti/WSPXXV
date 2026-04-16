@@ -1,0 +1,12 @@
+h3 Uppdatera din annons
+
+form action="/#{@posts["id"]}/update" method="post" enctype="multipart/form-data"
+    input type="text" name="title" value="#{@posts["title"]}" placeholder="Annonstitel"
+    textarea id="description" name="description" placeholder="Beskrivning av produkten eller tjänsten du vill låna ut"
+    input type="text" name="price" value="#{@posts["price"]}" placeholder="Pris"
+    select name="price_type"
+        option value="hour" per timme
+        option value="day" per dag
+        option value="week" per vecka
+    input type="file" name="image"
+    button type="submit" Uppdatera annons

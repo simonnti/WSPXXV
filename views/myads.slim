@@ -6,8 +6,10 @@ h2 Dina annonser
 - else
   - @posts.each do |post|
     .ad
-      h2 = post["title"]
-      p = post["description"]
-      p #{post["price"]} SEK / #{post["price_interval"]}
-      - if post["image_url"]
-        img src=post["image_url"] width="200"
+        img src="#{post['image_url']}" alt="Annonsbild" width="200"
+        h3
+            a href="/#{post['id']}/update" #{post['title']}
+        
+        h4 #{post['price']} SEK / #{post['price_type']}
+
+        hr
