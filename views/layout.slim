@@ -10,12 +10,16 @@ html lang="en"
 
         div class="nav"
             a href="/" Hem
-            a href="/private" Privat
-            a href="/" Företag
-            a href="/upload" Ladda Upp
             a href="/about" Om oss
-
+            a href="/upload" Ladda Upp
+            - if session[:user_id]
+                a href="/logout" Logga ut
+                a href="/myads" Mina annonser
+            - else
+                a href="/login" Logga in
+                a href="/register" Registrera
         section
+
             div class="main.content"
                 ==yield
                 

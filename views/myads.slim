@@ -1,0 +1,13 @@
+h2 Dina annonser
+
+
+- if @posts.empty?
+  p Du har inga annonser ännu.
+- else
+  - @posts.each do |post|
+    .ad
+      h2 = post["title"]
+      p = post["description"]
+      p #{post["price"]} SEK / #{post["price_interval"]}
+      - if post["image_url"]
+        img src=post["image_url"] width="200"
