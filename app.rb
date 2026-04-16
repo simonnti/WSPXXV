@@ -69,10 +69,9 @@ get('/:id/post') do
   @posts = db.execute(
     "SELECT posts.*, users.username 
     FROM posts 
-    JOIN users ON posts.user_id = users.id 
+    LEFT JOIN users ON posts.user_id = users.id 
     WHERE posts.id = ?",
-    [id]
-  ).first
+    [id]).first
   slim(:post)
 end
 
@@ -87,6 +86,23 @@ post('/register') do
   password = params[:password]
 
   password_digest = BCrypt::Password.create(password)
+  password_confirm = params[:password_confirm]
+
+  if password != password_confirm
+    @error = "Lösenorden matchar inte"
+    return slim(:register)
+  end
+
+  if username.strip.empty? || password.strip.empty?
+    @error = "Vänligen fyll i alla fält"
+    return slim(:register)
+  end
+
+  existing_user = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+  if existing_user
+    @error = "Användarnamnet är redan taget"
+    return slim(:register)
+  end
 
   db.execute(
     "INSERT INTO users (username, password_digest) VALUES (?, ?)",
