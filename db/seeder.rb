@@ -1,7 +1,6 @@
 require 'sqlite3'
 
 db1 = SQLite3::Database.new("posts.db")
-
 db2 = SQLite3::Database.new("users.db")
 
 def seed!(db)
@@ -47,11 +46,8 @@ def create_tables(db)
 end
 
 def populate_tables(db)
-  db.execute('INSERT INTO posts (title, description, price, price_type, image_url, user_id) VALUES("Betongbarriär", "Betongbarriär uthyres. Kan användas för avskärmning av större ytor utomhus, osv. Pris: 50 kr/dag", 50, "hour", "/img/barriar.jpg", 1)')
-  db.execute('INSERT INTO posts (title, description, price, price_type, image_url, user_id) VALUES("mer goy zlob", "goyslop", 100, "day", "/img/DAMN!!!!!!!!!!!!.jpg", 2)')
-  db.execute('INSERT INTO posts (title, description, price, price_type, image_url, user_id) VALUES("a a hahuh", "ahahahgags", 200, "week", "/img/green_fuck.jpg", 1)')
-  db.execute('INSERT INTO users (username, password_digest) VALUES ("john_doe", "fella")')
-  db.execute('INSERT INTO users (username, password_digest) VALUES ("jane_doe", "password123")')
+  db.execute('INSERT INTO posts (title, description, price, price_type, image_url, user_id) VALUES("Betongbarriär", "Betongbarriär uthyres. Kan användas för avskärmning av större ytor utomhus, osv. Pris: 50 kr/vecka", 50, "week", "/img/barriar.jpg", 1)')
+  db.execute('INSERT INTO users (username, password_digest) VALUES("john", "$2a$12$eG8m9n7u5l3Zt1Xo5j6b0u9v8w7x6y5z4a3b2c1d0e9f8g7h6i")')
 end
 
 seed!(db1)

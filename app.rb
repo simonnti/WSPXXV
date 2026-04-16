@@ -66,7 +66,13 @@ get('/:id/post') do
   db = SQLite3::Database.new("db/posts.db")
   id = params[:id].to_i
   db.results_as_hash = true
-  @posts = db.execute("SELECT * FROM posts WHERE id = ?", id).first
+  @posts = db.execute(
+    "SELECT posts.*, users.username 
+    FROM posts 
+    JOIN users ON posts.user_id = users.id 
+    WHERE posts.id = ?",
+    [id]
+  ).first
   slim(:post)
 end
 

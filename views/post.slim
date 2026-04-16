@@ -1,7 +1,10 @@
 h3 #{@posts["title"]}
 img src="#{@posts['image_url']}" alt="Annonsbild" width="200"
+p Price: #{@posts["price"]} SEK / #{@posts["price_type"]}
 p Description:
 p #{@posts["description"]}
+hr
+p Uppladdad av: #{@posts["username"]}
 
 form action="/#{@posts["id"]}/return" method="post"
     input type="submit" value="Tillbaka"
