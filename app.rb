@@ -6,17 +6,52 @@ require 'bcrypt'
 
 enable :sessions
 
+before do
+  @db = SQLite3::Database.new("db/database.db")
+  @db.results_as_hash = true
+end
+
+before '/upload' do
+  require_login
+end
+
+before '/myads*' do
+  require_login
+end
+
+before %r{/\d+/update} do
+  require_login
+end
+
+helpers do
+  def current_user
+    return nil unless session[:user_id]
+
+    @current_user ||= @db.execute(
+      "SELECT * FROM users WHERE id = ?",
+      [session[:user_id]]
+    ).first
+  end
+
+  def logged_in?
+    !!current_user
+  end
+
+  def require_login
+    redirect('/login') unless logged_in?
+  end
+
+  def owns_post?(post)
+    post && current_user && post["user_id"] == current_user["id"]
+  end
+end
+
 get('/') do
-  db = SQLite3::Database.new("db/posts.db")
-  id = params[:id].to_i
-  db.results_as_hash = true
-  @posts = db.execute("SELECT * FROM posts")
+  @posts = @db.execute("SELECT * FROM posts")
   slim(:home)
 end
 
 post('/upload') do
-  db = SQLite3::Database.new("db/posts.db")
-  db.results_as_hash = true
 
   title = params[:title]
   description = params[:description]
@@ -41,21 +76,13 @@ post('/upload') do
     image_url = nil
   end
 
-  db.execute(
+  @db.execute(
     "INSERT INTO posts (title, description, price_type, price, image_url, user_id)
      VALUES (?, ?, ?, ?, ?, ?)",
-    [title, description, price_type, price, image_url, session[:user_id]]
+    [title, description, price_type, price, image_url, current_user["id"]]
   )
 
   redirect('/')
-end
-
-get('/upload') do
-  if session[:user_id]
-    slim(:upload)
-  else
-    redirect('/login')
-  end
 end
 
 post("/:id/return") do
@@ -63,10 +90,9 @@ post("/:id/return") do
 end
 
 get('/:id/post') do
-  db = SQLite3::Database.new("db/posts.db")
   id = params[:id].to_i
-  db.results_as_hash = true
-  @posts = db.execute(
+
+  @posts = @db.execute(
     "SELECT posts.*, users.username 
     FROM posts 
     LEFT JOIN users ON posts.user_id = users.id 
@@ -80,8 +106,6 @@ get('/register') do
 end
 
 post('/register') do
-  db = SQLite3::Database.new("db/users.db")
-
   username = params[:username]
   password = params[:password]
 
@@ -98,13 +122,13 @@ post('/register') do
     return slim(:register)
   end
 
-  existing_user = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+  existing_user = @db.execute("SELECT * FROM users WHERE username = ?", [username]).first
   if existing_user
     @error = "Användarnamnet är redan taget"
     return slim(:register)
   end
 
-  db.execute(
+  @db.execute(
     "INSERT INTO users (username, password_digest) VALUES (?, ?)",
     [username, password_digest]
   )
@@ -117,20 +141,17 @@ get('/login') do
 end
 
 post('/login') do
-  db = SQLite3::Database.new("db/users.db")
-  db.results_as_hash = true
-
   username = params[:username]
   password = params[:password]
 
-  user = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+  user = @db.execute("SELECT * FROM users WHERE username = ?", [username]).first
 
   if user && BCrypt::Password.new(user["password_digest"]) == password
     session[:user_id] = user["id"]
     redirect('/')
   else
-    @error = "Fel användarnamn eller lösenord"
-    slim(:login)
+    session[:error] = "Något gick fel"
+    redirect('/login')
   end
 end
 
@@ -139,70 +160,56 @@ get('/logout') do
   redirect('/')
 end
 
-get('/myads') do
-  if session[:user_id]
-    db = SQLite3::Database.new("db/posts.db")
-    db.results_as_hash = true
-    @posts = db.execute("SELECT * FROM posts WHERE user_id = ?", session[:user_id])
-    slim(:myads)
-  else
-    redirect('/login')
-  end
-end
-
 post('/:id/update') do
-  if session[:user_id]
-    db = SQLite3::Database.new("db/posts.db")
-    id = params[:id].to_i
-    db.results_as_hash = true
-    post = db.execute("SELECT * FROM posts WHERE id = ?", [id]).first
 
-    if post && post["user_id"] == session[:user_id]
-      title = params[:title]
-      description = params[:description]
-      price = params[:price].to_f
-      price_type = params[:price_type]
+  id = params[:id].to_i
+  post = @db.execute("SELECT * FROM posts WHERE id = ?", [id]).first
 
-      if params[:image] && params[:image][:tempfile] && params[:image][:filename]
-        tempfile = params[:image][:tempfile]
+  if owns_post?(post)
+    title = params[:title]
+    description = params[:description]
+    price = params[:price].to_f
+    price_type = params[:price_type]
 
-        filename = params[:image][:filename]
-        filename = filename.force_encoding("UTF-8")
-        filename = filename.gsub(/[^0-9A-Za-z.\-]/, "_")
+    if params[:image] && params[:image][:tempfile] && params[:image][:filename]
+      tempfile = params[:image][:tempfile]
 
-        save_path = "./public/img/#{filename}"
+      filename = params[:image][:filename]
+      filename = filename.force_encoding("UTF-8")
+      filename = filename.gsub(/[^0-9A-Za-z.\-]/, "_")
 
-        File.open(save_path, "wb") do |f|
-          f.write(tempfile.read)
-        end
+      save_path = "./public/img/#{filename}"
 
-        image_url = "/img/#{filename}"
-      else
-        image_url = post["image_url"]
+      File.open(save_path, "wb") do |f|
+        f.write(tempfile.read)
       end
 
-      db.execute(
-        "UPDATE posts SET title = ?, description = ?, price_type = ?, price = ?, image_url = ? WHERE id = ?",
-        [title, description, price_type, price, image_url, id]
-      )
+      image_url = "/img/#{filename}"
+    else
+      image_url = post["image_url"]
     end
+
+    @db.execute(
+      "UPDATE posts SET title = ?, description = ?, price_type = ?, price = ?, image_url = ? WHERE id = ?",
+      [title, description, price_type, price, image_url, id]
+    )
   end
 
   redirect('/myads')
 end
 
 get('/:id/update') do
-  redirect('/login') unless session[:user_id]
-
-  db = SQLite3::Database.new("db/posts.db")
-  db.results_as_hash = true
 
   id = params[:id].to_i
-  @posts = db.execute("SELECT * FROM posts WHERE id = ?", [id]).first
+  @posts = @db.execute("SELECT * FROM posts WHERE id = ?", [id]).first
 
-  if @posts && @posts["user_id"] == session[:user_id]
+  if owns_post?(@posts)
     slim(:update)
   else
     redirect('/myads')
   end
+end
+
+get('/upload') do
+  slim(:upload)
 end

@@ -1,19 +1,8 @@
 require 'sqlite3'
 
-db1 = SQLite3::Database.new("posts.db")
-db2 = SQLite3::Database.new("users.db")
+db = SQLite3::Database.new("database.db")
 
 def seed!(db)
-  puts "Using db file: posts.db"
-  puts "🧹 Dropping old tables..."
-  drop_tables(db)
-  puts "🧱 Creating tables..."
-  create_tables(db)
-  puts "🍎 Populating tables..."
-  populate_tables(db)
-  puts "✅ Done seeding the database!"
-
-  puts "Using db file: users.db"
   puts "🧹 Dropping old tables..."
   drop_tables(db)
   puts "🧱 Creating tables..."
@@ -50,5 +39,4 @@ def populate_tables(db)
   db.execute('INSERT INTO users (username, password_digest) VALUES("john", "$2a$12$eG8m9n7u5l3Zt1Xo5j6b0u9v8w7x6y5z4a3b2c1d0e9f8g7h6i")')
 end
 
-seed!(db1)
-seed!(db2)
+seed!(db)
